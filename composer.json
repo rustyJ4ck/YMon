@@ -1,0 +1,13 @@
+{
+    "minimum-stability": "dev",
+
+    "autoload": {
+        "psr-4": {
+            "YMon\\": "app/"
+        }
+    },
+
+    "require": {
+        "phpoffice/phpexcel": "dev-develop"
+    }
+}

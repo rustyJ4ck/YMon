@@ -1,0 +1,43 @@
+# project
+
+/vendor/
+/tmp/
+
+bak
+
+!.gitkeep
+!.htaccess
+
+# misc             
+
+.cvsignore
+.idea/
+.tmb/
+.quarantine/
+*.bak
+CVS/
+tests-old/
+composer.lock
+node_modules/
+.npm-debug.log
+
+# logs
+
+*.log
+*.sql
+*.db
+*.exe
+*.txt
+*.pdf
+*.xls
+*.doc
+
+# OS junk
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
