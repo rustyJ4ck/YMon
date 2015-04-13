@@ -27,7 +27,7 @@ class Product {
 
     function getPriceAvg() {
         $meta = $this->getMetadata();
-        $avg = ($meta->model->price->min + $meta->model->price->max) / 2;
+        $avg = $meta->model->price->avg;
         return round($avg, 2);
     }
 }

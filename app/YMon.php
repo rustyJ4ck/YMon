@@ -68,9 +68,9 @@ class YMon {
             /** @var \PHPExcel_Cell $cell */
             foreach ($cells as  $cell) {
 
-                $value = $cell->getValue();
+                $value = trim($cell->getValue());
 
-                if ($cell->getRow() > 1 && $value) {
+                if ($cell->getRow() > 1) {
 
                     $product = $product ?: new Product();
 
@@ -86,7 +86,9 @@ class YMon {
 
             }
 
-            if ($product) $products [$product->code]= $product;
+            if ($product && !empty($product->code)) {
+                $products [$product->code]= $product;
+            }
         }
 
         // Fetch prices
@@ -115,7 +117,7 @@ class YMon {
                     $last = new \DateTime("@" . \PHPExcel_Shared_Date::ExcelToPHP($prevCell->getValue()));
                     $interval = $now->diff($last);
                     $diff = $interval->h + $interval->days * 24;
-                    if ($diff < $this->updateInterval) {
+                    if ($this->updateInterval !== false && $diff < $this->updateInterval) {
                         $uptodate = true;
                     }
                     Logger::d('lastupd: %s delta: %dH [%s] ', $last->format('d.m.Y H:i'), $diff, ($uptodate ? '-' : '+'));

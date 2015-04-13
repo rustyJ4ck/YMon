@@ -7,25 +7,38 @@
 
 namespace YMon\Yandex;
 
-class MarketAPI {
+class MarketAPI
+{
 
     private $productRegex = "@require\(\'page\'\)\.setData\((?P<payload>.*)\)\.init@U";
+    private $productAvgRegex = '@class="product-card__price-value">(?P<payload>[\d \.\,]+)@';
 
-    function getProductInfo($productID) {
+    function getProductInfo($productID)
+    {
 
         $cacher = \YMon\App::cacher();
 
         $url = 'http://market.yandex.ru/product/' . $productID . '/';
-        $id = $productID;
+        $id  = $productID;
 
         $cachedMetadata = $cacher->get('ym', $id);
 
         if (!$cachedMetadata) {
-            $buffer = file_get_contents($url);
+            $buffer   = file_get_contents($url);
             $metadata = null;
             if (preg_match($this->productRegex, $buffer, $matches)) {
                 $metadata = json_decode($matches['payload']);
+
+                if (!isset($metadata->model->price->avg)) {
+                    if (preg_match($this->productAvgRegex, $buffer, $matches)) {
+                        $metadata->model->price->avg = floatval(preg_replace('@[^\d]@', '', $matches['payload']));
+                    } else {
+                        // you nooo avg?
+                        $metadata->model->price->avg = ($metadata->model->price->min + $metadata->model->price->max) / 2;
+                    }
+                }
             }
+
             $cacher->set('ym', $id, $metadata, 3600);
         } else {
             $metadata = $cachedMetadata->value();
