@@ -12,6 +12,9 @@ use YMon\Util\Logger;
 
 class YMon {
 
+    /** @var int Update interval, hours */
+    private $updateInterval = 6;
+
 	private $sheetsPath;
 
 	function __construct($root = false) {
@@ -87,18 +90,6 @@ class YMon {
         }
 
         // Fetch prices
-
-        /** @var Product $product */
-        /*
-        foreach ($products as $product) {
-            Logger::d('product: [%10s] %s', $product->code, $product->name);
-            $meta = $product->getMetadata();
-            if ($meta->model) {
-                Logger::d('... %.2f --> %.2f', $meta->model->price->min, $meta->model->price->max);
-            }
-        }
-        */
-
         // Update excel
 
         $sheet = $book->setActiveSheetIndexByName('Prices');
@@ -109,19 +100,25 @@ class YMon {
 
         $updated = 0;
 
+        $now = new \DateTime();
+
         while (1) {
+
             $cell = $sheet->getCellByColumnAndRow(0, $rowID);
 
             if (!$cell->getValue()) {
 
                 $uptodate = false;
 
-                // update if >= 6hours sinse last update
+                // update if >= 6hours since last update
                 if ($prevCell) {
-                    $now = new \DateTime();
-                    $diff = $now->diff(new \DateTime("@" . \PHPExcel_Shared_Date::ExcelToPHP($prevCell->getValue())));
-                    if ($diff->h < 6) $uptodate = true;
-                    Logger::d('lastupd: %d:%d HM [%s]', $diff->h, $diff->i, ($uptodate ? '-' : '+'));
+                    $last = new \DateTime("@" . \PHPExcel_Shared_Date::ExcelToPHP($prevCell->getValue()));
+                    $interval = $now->diff($last);
+                    $diff = $interval->h + $interval->days * 24;
+                    if ($diff < $this->updateInterval) {
+                        $uptodate = true;
+                    }
+                    Logger::d('lastupd: %s delta: %dH [%s] ', $last->format('d.m.Y H:i'), $diff, ($uptodate ? '-' : '+'));
                 }
 
                 // Update!
@@ -134,7 +131,6 @@ class YMon {
             }
 
             $prevCell = $cell;
-
             $rowID++;
 
         }
@@ -169,19 +165,6 @@ class YMon {
             Logger::d('.. %-25s  %.2f', $product->name, $avg);
             $column++;
         }
-
-        /*
-        $stationNameCell = $resultSheet->getCellByColumnAndRow(3, $currentRow + $i);
-
-        $stationNameCell->setDataType(PHPExcel_Cell_DataType::TYPE_STRING2);
-        $stationNameCell->getStyle()->getFont()->setColor(new PHPExcel_Style_Color(PHPExcel_Style_Color::COLOR_DARKBLUE));
-        $stationNameCell->setValue(
-        //($currentRow+$i) . ' : ' . $i . ' | ' . $stationRows . ' ' .
-            $stations[$i]['FULLNAME']
-        )->getHyperlink()->setUrl($url);
-
-        */
-
     }
 
     /**
