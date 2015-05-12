@@ -7,15 +7,21 @@
 
 namespace YMon;
 
+use PHPExcel_Cell;
+use YMon\Currency\Cbrf;
 use YMon\Model\Product;
 use YMon\Util\Logger;
 
 class YMon {
 
-    /** @var int Update interval, hours */
-    private $updateInterval = 6;
+    protected $usdColumn = 'M';
 
-	private $sheetsPath;
+    /** @var int Update interval, hours */
+    protected $updateInterval = 6;
+
+    protected $sheetsPath;
+
+    private $dryRun = false;
 
 	function __construct($root = false) {
 		$this->sheetsPath = $root ? $root : (__DIR__ . '/../sheets');
@@ -127,6 +133,7 @@ class YMon {
                 if (!$uptodate) {
                     $updated++;
                     $this->updateProductsRow($sheet, $products, $rowID);
+                    $this->updateUSDRate($sheet, $rowID);
                 }
 
                 break;
@@ -139,6 +146,17 @@ class YMon {
 
         // update done
         return $updated;
+    }
+
+    /**
+    * @param \PHPExcel_Worksheet $sheet
+    */
+    function updateUSDRate($sheet, $rowID) {
+      $column = PHPExcel_Cell::columnIndexFromString($this->usdColumn) - 1;
+      $cell = $sheet->getCellByColumnAndRow($column, $rowID);
+      $usdRate = new Cbrf();
+      $cell->setValue($value = $usdRate->getUSDRate());
+      Logger::d('.. USD$ %.2f %d %d', $value, $column, $rowID);
     }
 
     /**
@@ -191,6 +209,8 @@ class YMon {
     }
 
     function saveExcel($excel, $file) {
+
+        if ($this->dryRun) return;
 
         Logger::d('XLS.Save: %s', $file);
         $type = preg_match('@\.xlsx$@', $file) ? 'Excel2007' : 'Excel5';
