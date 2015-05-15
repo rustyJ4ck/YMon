@@ -12,7 +12,8 @@ use YMon\Currency\Cbrf;
 use YMon\Model\Product;
 use YMon\Util\Logger;
 
-class YMon {
+class YMon
+{
 
     protected $usdColumn = 'M';
 
@@ -21,26 +22,28 @@ class YMon {
 
     protected $sheetsPath;
 
-    private $dryRun = false;
+    protected $dryRun = false;
 
-	function __construct($root = false) {
-		$this->sheetsPath = $root ? $root : (__DIR__ . '/../sheets');
-		$this->sheetsPath .= '/';
-	}
+    function __construct($root = false)
+    {
+        $this->sheetsPath = $root ? $root : (__DIR__ . '/../sheets');
+        $this->sheetsPath .= '/';
+    }
 
-    function process() {
+    function process()
+    {
         $this->listBooks();
     }
 
-	function listBooks() {
-		foreach (glob($this->sheetsPath . '*.xlsx') as $file) {
+    function listBooks()
+    {
+        foreach (glob($this->sheetsPath . '*.xlsx') as $file) {
 
             $book = null;
 
             try {
-			    $book = $this->getBook($file);
-            }
-            catch (\PHPExcel_Reader_Exception $e) {
+                $book = $this->getBook($file);
+            } catch (\PHPExcel_Reader_Exception $e) {
                 Logger::d('Error: %s', $e->getMessage());
             }
 
@@ -53,17 +56,18 @@ class YMon {
                     }
                 }
             }
-		}
-	}
+        }
+    }
 
     /**
      * @param \PHPExcel $book
      */
-	function parseBook($book) {
+    function parseBook($book)
+    {
 
         $products = [];
 
-		$sheet = $book->setActiveSheetIndexByName('Products');
+        $sheet = $book->setActiveSheetIndexByName('Products');
 
         // Build products list
 
@@ -72,7 +76,7 @@ class YMon {
             $cells = $row->getCellIterator();
             $product = null;
             /** @var \PHPExcel_Cell $cell */
-            foreach ($cells as  $cell) {
+            foreach ($cells as $cell) {
 
                 $value = trim($cell->getValue());
 
@@ -93,7 +97,7 @@ class YMon {
             }
 
             if ($product && !empty($product->code)) {
-                $products [$product->code]= $product;
+                $products [$product->code] = $product;
             }
         }
 
@@ -149,21 +153,23 @@ class YMon {
     }
 
     /**
-    * @param \PHPExcel_Worksheet $sheet
-    */
-    function updateUSDRate($sheet, $rowID) {
-      $column = PHPExcel_Cell::columnIndexFromString($this->usdColumn) - 1;
-      $cell = $sheet->getCellByColumnAndRow($column, $rowID);
-      $usdRate = new Cbrf();
-      $cell->setValue($value = $usdRate->getUSDRate());
-      Logger::d('.. USD$ %.2f %d %d', $value, $column, $rowID);
+     * @param \PHPExcel_Worksheet $sheet
+     */
+    function updateUSDRate($sheet, $rowID)
+    {
+        $column = PHPExcel_Cell::columnIndexFromString($this->usdColumn) - 1;
+        $cell = $sheet->getCellByColumnAndRow($column, $rowID);
+        $usdRate = new Cbrf();
+        $cell->setValue($value = $usdRate->getUSDRate());
+        Logger::d('.. USD$ %.2f %d %d', $value, $column, $rowID);
     }
 
     /**
      * @param \PHPExcel_Worksheet $sheet
      * @param $products
      */
-    function updateProductsRow($sheet, $products, $rowID) {
+    function updateProductsRow($sheet, $products, $rowID)
+    {
 
 
         // $sheet->insertNewRowBefore($rowID, 1);
@@ -191,24 +197,27 @@ class YMon {
      * @param $filename
      * \PHPExcel_Reader_Excel2007
      */
-    function getBook($filename) {
+    function getBook($filename)
+    {
         // $cacheMethod = PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
         $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_in_memory;
-        $cacheSettings = array( 'memoryCacheSize' => '8MB');
+        $cacheSettings = array('memoryCacheSize' => '8MB');
         \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
 
         $book = $this->readExcel($filename);
 
         return $book;
-	}
+    }
 
-    function readExcel($inputFileName) {
+    function readExcel($inputFileName)
+    {
         Logger::d('XLS.read: %s', $inputFileName);
         $objPHPExcel = \PHPExcel_IOFactory::load($inputFileName);
         return $objPHPExcel;
     }
 
-    function saveExcel($excel, $file) {
+    function saveExcel($excel, $file)
+    {
 
         if ($this->dryRun) return;
 
@@ -218,7 +227,70 @@ class YMon {
         $writer->save($file);
     }
 
+    // g/setters
 
+    /**
+     * @return string
+     */
+    public function getUsdColumn()
+    {
+        return $this->usdColumn;
+    }
 
+    /**
+     * @param string $usdColumn
+     */
+    public function setUsdColumn($usdColumn)
+    {
+        $this->usdColumn = $usdColumn;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUpdateInterval()
+    {
+        return $this->updateInterval;
+    }
+
+    /**
+     * @param int $updateInterval
+     */
+    public function setUpdateInterval($updateInterval)
+    {
+        $this->updateInterval = $updateInterval;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSheetsPath()
+    {
+        return $this->sheetsPath;
+    }
+
+    /**
+     * @param string $sheetsPath
+     */
+    public function setSheetsPath($sheetsPath)
+    {
+        $this->sheetsPath = $sheetsPath;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDryRun()
+    {
+        return $this->dryRun;
+    }
+
+    /**
+     * @param boolean $dryRun
+     */
+    public function setDryRun($dryRun)
+    {
+        $this->dryRun = $dryRun;
+    }
 
 }

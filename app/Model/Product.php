@@ -27,7 +27,7 @@ class Product {
 
     function getPriceAvg() {
         $meta = $this->getMetadata();
-        $avg = $meta->model->price->avg;
+        $avg = $meta ? $meta->model->price->avg : 0.00;
         return round($avg, 2);
     }
 }
