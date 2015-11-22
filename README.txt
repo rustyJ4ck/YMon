@@ -22,3 +22,6 @@
 [2.8652] .. LG F-80C3LD                20437.50                         
 [2.8652] Updated rows: 1                                                
 [2.8662] XLS.Save: sheets/example.xlsx   
+
+Описание на русском
+http://www.skillz.ru/dev/php/article-script_monitoringa_cen_yandex_marketa.html
