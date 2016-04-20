@@ -24,4 +24,6 @@
 [2.8662] XLS.Save: sheets/example.xlsx   
 
 Описание на русском
-http://www.skillz.ru/dev/php/article-script_monitoringa_cen_yandex_marketa.html
+http://www.skillz.ru/dev/php/article-script_monitoringa_cen_yandex_marketa.html [Пример](http://wb.4zu.ru/)
+
+
